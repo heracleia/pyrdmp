@@ -1,24 +1,70 @@
-from dmp import DynamicMovementPrimative as DMP
+from dmp import DynamicMovementPrimitive as DMP
 import numpy as np
 
-mydmp = DMP(2,2,2,2,2)
+import matplotlib.pyplot as plt
 
-#print(mydmp.distributions(mydmp.phase(np.linspace(1,2,50))))
+# Initialize the DMP class
+my_dmp = DMP(20, 20, 0)
 
-data = DMP.load_demo("Demos/demo1.txt")
+# Filtering Parameters
+window = 5
+blends = 2
 
-# test the following function
-print(DMP.parse_demo(data))
+# Load the demo data
+data = DMP.load_demo("demos/demo1.txt")
 
-q, t = DMP.parse_demo(data)
+# Obtain the joint position data and the time vector
+t, q = DMP.parse_demo(data)
 
-l = len(q);
+print(q.shape)
 
+# Normalize the time vector
 t = DMP.normalize_vector(t)
 
-def prototype(fileName):
-    q, t = DMP.parseDemo(DMP.loadDemo(fileName))
-    l = q.shape
-    t = DMP.normalizeVector(t)
-    
-    
+# Compute velocity and acceleration
+dq = np.zeros(q.shape)
+ddq = np.zeros(q.shape)
+
+for i in range(0, q.shape[1]):
+	q[:, i] = DMP.smooth(q[:, i], window)
+	dq[:, i] = DMP.vel(q[:, i], t)
+	ddq[:, i] = DMP.vel(dq[:, i], t)
+
+# Filter the position velocity and acceleration signals
+f_q = np.zeros(q.shape)
+f_dq = np.zeros(q.shape)
+f_ddq = np.zeros(q.shape)
+
+for i in range(0, q.shape[1]):
+	f_q[:, i] = DMP.blends(q[:, i], dq[:, i], t, blends)
+	f_dq[:, i] = DMP.vel(f_q[:, i], t)
+	f_ddq[:, i] = DMP.vel(f_dq[:, i], t)
+
+
+
+# Ploting functions
+"""
+# Positions
+plt.figure(1)
+for i in range(0, q.shape[1]):
+	plt.subplot(q.shape[1], 1, i)
+	plt.plot(t, q[:, i], 'b')
+	plt.plot(t, f_q[:, i], 'r')
+plt.show()
+
+# Velocity
+plt.figure(2)
+for i in range(0, q.shape[1]):
+	plt.subplot(q.shape[1], 1, i)
+	plt.plot(t, dq[:, i], 'b')
+	plt.plot(t, f_dq[:, i], 'r')
+plt.show()
+
+# Acceleration
+plt.figure(3)
+for i in range(0, q.shape[1]):
+	plt.subplot(q.shape[1], 1, i)
+	plt.plot(t, ddq[:, i], 'b')
+	plt.plot(t, f_ddq[:, i], 'r')
+plt.show()
+"""
