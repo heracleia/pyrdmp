@@ -83,37 +83,41 @@ class DynamicMovementPrimitive:
         up = 0
         down = window
 
-        print(len(time))
-        print(window)
-
-        print('-------')
-
         for i in range(0, blends):
 
-            if i == blends:
-                pad = (len(time)-down)
+            if i == blends-1:
+                pad = (len(time)-down)-1
+                print('end')
+                print(pad)
                 window = window+pad
                 down = down+pad
 
+            q_s = q[up]
+            q_f = q[down]
+
+            dq_s = dq[up]
+            dq_f = dq[down]
+            print(window)
+            c = DynamicMovementPrimitive.coefficient(q_s, q_f, dq_s, dq_f, time[window])
+            dummy = DynamicMovementPrimitive.trajectory(c, time[0:window])
             print(i)
             print(up)
             print(down)
+            print(down-window)
+            print(down)
+            print('----------')
+            print(dummy[0])
+            print(dummy[-1])
 
-            #q_s = q[up]
-            #q_f = q[down]
-
-            #dq_s = dq[up]
-            #dq_f = dq[down]
-
-            #c = DynamicMovementPrimitive.coefficient(q_s, q_f, dq_s, dq_f, time[window])
-            #dummy = DynamicMovementPrimitive.trajectory(c, time[0:window])
-
-            #tj[down-window:down]=dummy
+            tj[down-window:down] = dummy
+            print(tj[down-window:down].shape)
+            print(dummy.shape)
 
             up = down+1
             down = down+window
+            print('==============')
 
-        print('=========')
+            print ('shape endings:', time.shape, tj.shape, dummy.shape)
 
         return tj
 
@@ -134,11 +138,13 @@ class DynamicMovementPrimitive:
 
     #  Perform polynomial fitting
     @staticmethod
-    def trajectory(alpha, time):
-        tj = np.zeros(len(time))
+    def trajectory(alpha, t):
+        tj = np.zeros(len(t))
 
-        for i in range(0, len(time) - 1):
-            tj[i] = np.polyval(alpha, time[i])
+        for i in range(0, len(t)):
+            t_2nd = np.power(t[i], 2)
+            t_3rd = np.power(t[i], 3)
+            tj[i] = alpha[0]+np.multiply(alpha[1], t[i])+np.multiply(alpha[2], t_2nd)+np.multiply(alpha[3], t_3rd)
 
         return tj
 
