@@ -1,7 +1,7 @@
 from dmp import DynamicMovementPrimitive as DMP
 import numpy as np
-
 import matplotlib.pyplot as plt
+from plots import plot as Plot
 
 # Initialize the DMP class
 my_dmp = DMP(20, 20, 0)
@@ -15,6 +15,10 @@ data = DMP.load_demo("demos/demo1.txt")
 
 # Obtain the joint position data and the time vector
 t, q = DMP.parse_demo(data)
+
+# Get the phase from the time vector
+phase = my_dmp.phase(t)
+Plot.phase(phase)
 
 print(q.shape)
 
@@ -64,3 +68,4 @@ for i in range(0, q.shape[1]):
 	plt.plot(t, ddq[:, i], 'b')
 	plt.plot(t, f_ddq[:, i], 'r')
 plt.show()
+"""
