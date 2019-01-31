@@ -78,7 +78,7 @@ class DynamicMovementPrimitive:
     def blends(q, dq, time, blends):
 
         tj = np.zeros(len(time))
-        window = len(time)//blends
+        window = len(time)//blends-1
 
         up = 0
         down = window
@@ -86,9 +86,7 @@ class DynamicMovementPrimitive:
         for i in range(0, blends):
 
             if i == blends-1:
-                pad = (len(time)-down)-1
-                print('end')
-                print(pad)
+                pad = len(time)-down-1
                 window = window+pad
                 down = down+pad
 
@@ -97,27 +95,14 @@ class DynamicMovementPrimitive:
 
             dq_s = dq[up]
             dq_f = dq[down]
-            print(window)
-            c = DynamicMovementPrimitive.coefficient(q_s, q_f, dq_s, dq_f, time[window])
-            dummy = DynamicMovementPrimitive.trajectory(c, time[0:window])
-            print(i)
-            print(up)
-            print(down)
-            print(down-window)
-            print(down)
-            print('----------')
-            print(dummy[0])
-            print(dummy[-1])
 
-            tj[down-window:down] = dummy
-            print(tj[down-window:down].shape)
-            print(dummy.shape)
+            c = DynamicMovementPrimitive.coefficient(q_s, q_f, dq_s, dq_f, time[window])
+            dummy = DynamicMovementPrimitive.trajectory(c, time[0:window+1])
+
+            tj[down-window:down+1] = dummy
 
             up = down+1
             down = down+window
-            print('==============')
-
-            print ('shape endings:', time.shape, tj.shape, dummy.shape)
 
         return tj
 
@@ -126,13 +111,13 @@ class DynamicMovementPrimitive:
     def coefficient(q_s, q_f, dq_s, dq_f, t):
         alpha = np.zeros(4)
 
-        t_2nd=np.power(t, 2)
+        t_2nd = np.power(t, 2)
         t_3rd = np.power(t, 3)
 
         alpha[0] = q_s
         alpha[1] = dq_s
         alpha[2] = np.divide(np.multiply(3, q_f-q_s), t_2nd)-np.divide(np.multiply(2, dq_s), t)-np.divide(dq_f, t)
-        alpha[3] = np.divide(np.multiply(-2, q_f-q_s), t_3rd)+np.divide(dq_f-dq_s, t_2nd)
+        alpha[3] = np.divide(np.multiply(-2, q_f-q_s), t_3rd)+np.divide(dq_f+dq_s, t_2nd)
 
         return alpha
 
