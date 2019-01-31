@@ -78,42 +78,23 @@ class DynamicMovementPrimitive:
     def blends(q, dq, time, blends):
 
         tj = np.zeros(len(time))
-        window = len(time)//blends
+        window = len(time)//blends-1
 
         up = 0
         down = window
 
-        print(len(time))
-        print(window)
-
-        print('-------')
-
         for i in range(0, blends):
 
-            if i == blends:
-                pad = (len(time)-down)
+            if i == blends-1:
+                pad = len(time)-down-1
                 window = window+pad
                 down = down+pad
 
-            print(i)
-            print(up)
-            print(down)
-
-            #q_s = q[up]
-            #q_f = q[down]
-
-            #dq_s = dq[up]
-            #dq_f = dq[down]
-
-            #c = DynamicMovementPrimitive.coefficient(q_s, q_f, dq_s, dq_f, time[window])
-            #dummy = DynamicMovementPrimitive.trajectory(c, time[0:window])
-
-            #tj[down-window:down]=dummy
+            c = DynamicMovementPrimitive.coefficient(q[up], q[down], dq[up], dq[down], time[window])
+            tj[down - window:down + 1] = DynamicMovementPrimitive.trajectory(c, time[0:window+1])
 
             up = down+1
             down = down+window
-
-        print('=========')
 
         return tj
 
@@ -122,23 +103,25 @@ class DynamicMovementPrimitive:
     def coefficient(q_s, q_f, dq_s, dq_f, t):
         alpha = np.zeros(4)
 
-        t_2nd=np.power(t, 2)
+        t_2nd = np.power(t, 2)
         t_3rd = np.power(t, 3)
 
         alpha[0] = q_s
         alpha[1] = dq_s
         alpha[2] = np.divide(np.multiply(3, q_f-q_s), t_2nd)-np.divide(np.multiply(2, dq_s), t)-np.divide(dq_f, t)
-        alpha[3] = np.divide(np.multiply(-2, q_f-q_s), t_3rd)+np.divide(dq_f-dq_s, t_2nd)
+        alpha[3] = np.divide(np.multiply(-2, q_f-q_s), t_3rd)+np.divide(dq_f+dq_s, t_2nd)
 
         return alpha
 
     #  Perform polynomial fitting
     @staticmethod
-    def trajectory(alpha, time):
-        tj = np.zeros(len(time))
+    def trajectory(alpha, t):
+        tj = np.zeros(len(t))
 
-        for i in range(0, len(time) - 1):
-            tj[i] = np.polyval(alpha, time[i])
+        for i in range(0, len(t)):
+            t_2nd = np.power(t[i], 2)
+            t_3rd = np.power(t[i], 3)
+            tj[i] = alpha[0]+np.multiply(alpha[1], t[i])+np.multiply(alpha[2], t_2nd)+np.multiply(alpha[3], t_3rd)
 
         return tj
 

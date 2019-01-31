@@ -8,7 +8,7 @@ my_dmp = DMP(20, 20, 0)
 
 # Filtering Parameters
 window = 5
-blends = 2
+blends = 10
 
 # Load the demo data
 data = DMP.load_demo("demos/demo1.txt")
@@ -47,14 +47,12 @@ for i in range(0, q.shape[1]):
 
 
 # Ploting functions
-"""
-# Positions
+
 plt.figure(1)
 for i in range(0, q.shape[1]):
 	plt.subplot(q.shape[1], 1, i)
-	plt.plot(t, q[:, i], 'b')
-	plt.plot(t, f_q[:, i], 'r')
-plt.show()
+	plt.plot(q[:, i], 'b')
+	plt.plot(f_q[:, i], 'r')
 
 # Velocity
 plt.figure(2)
@@ -62,7 +60,6 @@ for i in range(0, q.shape[1]):
 	plt.subplot(q.shape[1], 1, i)
 	plt.plot(t, dq[:, i], 'b')
 	plt.plot(t, f_dq[:, i], 'r')
-plt.show()
 
 # Acceleration
 plt.figure(3)
