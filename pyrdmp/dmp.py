@@ -90,16 +90,8 @@ class DynamicMovementPrimitive:
                 window = window+pad
                 down = down+pad
 
-            q_s = q[up]
-            q_f = q[down]
-
-            dq_s = dq[up]
-            dq_f = dq[down]
-
-            c = DynamicMovementPrimitive.coefficient(q_s, q_f, dq_s, dq_f, time[window])
-            dummy = DynamicMovementPrimitive.trajectory(c, time[0:window+1])
-
-            tj[down-window:down+1] = dummy
+            c = DynamicMovementPrimitive.coefficient(q[up], q[down], dq[up], dq[down], time[window])
+            tj[down - window:down + 1] = DynamicMovementPrimitive.trajectory(c, time[0:window+1])
 
             up = down+1
             down = down+window
