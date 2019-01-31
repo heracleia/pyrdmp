@@ -68,4 +68,3 @@ for i in range(0, q.shape[1]):
 	plt.plot(t, ddq[:, i], 'b')
 	plt.plot(t, f_ddq[:, i], 'r')
 plt.show()
-"""
