@@ -32,7 +32,22 @@ class DynamicMovementPrimitive:
 
     # Generate a gaussian distribution
     def distributions(self, s):
-        raise Exception('Function not implemented yet')
+
+        # Find the centers of the Gaussian in the s domain
+        step = np.divide(s[0]-s[-1], self.ng-1)
+        c = np.arange(min(s), max(s)+step, step)
+        d = np.diff(c)
+        c = np.divide(c, d[0])
+
+        # Calculate every gaussian
+        h = 1
+        psv = np.zeros((self.ng, len(s)))
+
+        for i in range(0, self.ng):
+            for j in range(0, len(s)):
+                psv[i][j] = DynamicMovementPrimitive.psi(h, c[i], np.divide(s[j], d[0]))
+
+        return psv
 
     # Imitation Learning
     def imitate(self, x, dx, ddx, time, s, psv):
@@ -57,12 +72,13 @@ class DynamicMovementPrimitive:
                 mod = 0
                 sigma[i] = s[i]
 
+            # Check again in the future
             f_target[i] = np.multiply(np.power(tau, 2), ddx[i]) - self.a*(self.b*(g-x[i])-tau*dx[i])+mod
 
         # Regression
         for i in range(0, self.ng):
 
-            w[i] = np.divide(np.transpose(sigma)*np.diagonal(psv[i][:])*f_target,np.transpose(sigma)*np.diagonal(psv[i][:])*sigma)
+            w[i] = np.divide(np.matmul(np.matmul(sigma.T, np.diag(psv[i, :])), f_target), np.matmul(np.matmul(sigma.T, np.diag(psv[i, :])), sigma))
 
         return f_target, w
 
@@ -166,7 +182,7 @@ class DynamicMovementPrimitive:
 
     # Calculate psi (gaussian) based on its height, center, and state
     @staticmethod
-    def psv(height, center, state):
+    def psi(height, center, state):
         return np.exp((-height)*(np.power(state-center, 2)))
 
     # Calculate the velocity given the position and time
@@ -194,7 +210,7 @@ class DynamicMovementPrimitive:
                 window = window+pad
                 down = down+pad
 
-            c = DynamicMovementPrimitive.coefficient(q[up], q[down], dq[up], dq[down], time[window])
+            c = DynamicMovementPrimitive.coefficient(q[up], q[down], dq[up], dq[down], time[window-1])
             tj[down - window:down + 1] = DynamicMovementPrimitive.trajectory(c, time[0:window+1])
 
             up = down+1

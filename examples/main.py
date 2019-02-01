@@ -1,6 +1,5 @@
 from dmp import DynamicMovementPrimitive as DMP
 import numpy as np
-import matplotlib.pyplot as plt
 from plots import plot as Plot
 
 # Initialize the DMP class
@@ -17,10 +16,10 @@ data = DMP.load_demo("demos/demo1.txt")
 t, q = DMP.parse_demo(data)
 
 # Get the phase from the time vector
-phase = my_dmp.phase(t)
-Plot.phase(phase)
+s = my_dmp.phase(t)
 
-print(q.shape)
+# Get the Gaussian
+psv = my_dmp.distributions(s)
 
 # Normalize the time vector
 t = DMP.normalize_vector(t)
@@ -44,32 +43,21 @@ for i in range(0, q.shape[1]):
 	f_dq[:, i] = DMP.vel(f_q[:, i], t)
 	f_ddq[:, i] = DMP.vel(f_dq[:, i], t)
 
-Plot.position(q, f_q)
-Plot.velocity(q, t, dq, f_dq)
-Plot.acceleration(q, t, ddq, f_ddq)
+# Imitation Learning
+ftarget = np.zeros(q.shape)
+w = np.zeros((my_dmp.ng, q.shape[1]))
 
-Plot.show_all()
-'''
-# Ploting functions
+print('Imitation start')
 
-plt.figure(1)
 for i in range(0, q.shape[1]):
-	plt.subplot(q.shape[1], 1, i)
-	plt.plot(q[:, i], 'b')
-	plt.plot(f_q[:, i], 'r')
+	ftarget[:, i], w[:, i] = my_dmp.imitate(f_q[:, i], f_dq[:, i], f_ddq[:, i], t, s, psv)
 
-# Velocity
-plt.figure(2)
-for i in range(0, q.shape[1]):
-	plt.subplot(q.shape[1], 1, i)
-	plt.plot(t, dq[:, i], 'b')
-	plt.plot(t, f_dq[:, i], 'r')
+print('Imitation done')
 
-# Acceleration
-plt.figure(3)
-for i in range(0, q.shape[1]):
-	plt.subplot(q.shape[1], 1, i)
-	plt.plot(t, ddq[:, i], 'b')
-	plt.plot(t, f_ddq[:, i], 'r')
-plt.show()
-'''
+# Plot functions
+#Plot.position(q, f_q)
+#Plot.velocity(q, t, dq, f_dq)
+#Plot.acceleration(q, t, ddq, f_ddq)
+#Plot.phase(s)
+
+#Plot.show_all()
