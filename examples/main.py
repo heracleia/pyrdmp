@@ -54,10 +54,15 @@ for i in range(0, q.shape[1]):
 
 print('Imitation done')
 
-# Plot functions
-#Plot.position(q, f_q)
-#Plot.velocity(q, t, dq, f_dq)
-#Plot.acceleration(q, t, ddq, f_ddq)
-#Plot.phase(s)
+# Generate the Learned trajectory
+x = np.zeros(q.shape)
+dx = np.zeros(q.shape)
+ddx = np.zeros(q.shape)
 
-#Plot.show_all()
+for i in range(0, q.shape[1]):
+	ddx[:, i], dx[:, i], x[:, i] = my_dmp.generate(w[:, i], f_q[0, i], f_q[-1, i], t, s, psv)
+
+
+# Plot functions
+Plot.position(t, f_q, x)
+Plot.show_all()

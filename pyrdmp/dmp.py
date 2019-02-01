@@ -93,17 +93,16 @@ class DynamicMovementPrimitive:
         f_rep = np.zeros(len(time))
 
         tau = time[-1]
-        x[0] = x0
 
         dx_r = 0
-        x_r = 0
+        x_r = x0
 
         for i in range(0, len(time)):
 
             p_sum = 0
             p_div = 0
 
-            if i == 1:
+            if i == 0:
                 dt = time[i]
             else:
                 dt = time[i] - time[i - 1]

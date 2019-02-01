@@ -13,31 +13,31 @@ class plot:
         return figure
 
     @staticmethod
-    def position(q, f_q):
+    def position(t, q, f_q):
         figure = plt.figure()
         figure.suptitle("Position")
         for i in range(q.shape[1]):
-	    plt.subplot(q.shape[1], 1, i)
-            plt.plot(q[:, i], 'b')
-            plt.plot(f_q[:, i], 'r')
-	return figure
+            plt.subplot(q.shape[1], 1, i)
+            plt.plot(t, q[:, i], 'b')
+            plt.plot(t, f_q[:, i], 'r')
+        return figure
 
     @staticmethod
-    def velocity(q, t, dq, f_dq):
+    def velocity(t, dq, f_dq):
         figure = plt.figure()
         figure.suptitle("Velocity")
-        for i in range(q.shape[1]):
-            plt.subplot(q.shape[1], 1, i)
+        for i in range(dq.shape[1]):
+            plt.subplot(dq.shape[1], 1, i)
             plt.plot(t, dq[:, i], 'b')
             plt.plot(t, f_dq[:, i], 'r')
-	return figure
+        return figure
 
     @staticmethod
-    def acceleration(q, t, ddq, f_ddq):
+    def acceleration(t, ddq, f_ddq):
         figure = plt.figure()
         figure.suptitle("Acceleration")
-        for i in range(q.shape[1]):
-            plt.subplot(q.shape[1], 1, i)
+        for i in range(ddq.shape[1]):
+            plt.subplot(ddq.shape[1], 1, i)
             plt.plot(t, ddq[:, i], 'b')
             plt.plot(t, f_ddq[:, i], 'r')
 
