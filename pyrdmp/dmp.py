@@ -134,24 +134,76 @@ class DynamicMovementPrimitive:
 
         return ddx, dx, x
 
-    """"
     # Adaptation using reinforcement learning
-    def adapt(self, w, x0, g, time, s, psv, samples, rate):
+    def adapt(self, w, x0, g, t, s, psv, samples, rate):
 
-        # Intialize the action variables
+        # Initialize the action variables
         actions = np.ones(samples, self.ng)
         exploration = np.zeros(samples, self.ng)
-        a=w
+        a = w
 
         # Flag which acts as a stop condition
-        flag=0
+        flag = 0
 
-        while flag==0:
+        while flag == 0:
 
             for i in range(0, samples):
                 for j in range(0, self.ng):
-                    exploration[i][j]=
-    """
+                    exploration[i, j] = np.random.normal(0, np.std(psv[j, :], a[j]), 1)
+
+            for i in range(0, samples):
+                actions[i, :] = a + exploration[i, :]
+
+            # Generate new rollouts
+            x = np.zeros((len(t), samples))
+            dx = np.zeros((len(t), samples))
+            ddx = np.zeros((len(t), samples))
+
+            for i in range(0, samples):
+                ddx[:, i], dx[:, i], x[:, i] = self.generate(actions[:, i], x0, g, t, s, psv)
+
+            # Estimate the Q values
+            Q = np.zeros(samples)
+
+            for i in range(0, samples):
+                sum =0
+                for j in range(0, len(t)):
+                    sum = sum + DynamicMovementPrimitive.reward(g, x[j, i], t[j])
+                Q[i] = sum
+
+            # Sample the highest Q values to adapt the action parameters
+            sorted_samples = np.argsort(Q)[:np.floor(samples*rate)]
+
+            # Update the action parameter
+            sumQ_y = 0
+            sumQ_x = np.zeros(samples)
+
+            for i in sorted_samples:
+                sumQ_y = sumQ_y + Q[i]
+                sumQ_x = sumQ_x + exploration[i, :]*Q[i]
+
+            a = a + sumQ_x/sumQ_y
+
+            if np.abs(x[-1, sorted_samples[0]])-g < 0.1:
+                flag=1
+
+        return ddx, dx, x
+
+    # Reward function
+    @staticmethod
+    def reward(goal, position, time):
+
+        w = 0.5
+        thres = 0.01
+        temp = goal - position
+        tau = time[-1]
+
+        if np.abs(time - tau) < thres:
+            rwd = w*np.exp(-np.sqrt(temp.dot(temp.T)))
+        else:
+            rwd = (1-w) * np.exp(-np.sqrt(temp.dot(temp.T)))/tau
+
+        return rwd
 
     # Function that smooths a trajectory
     # a: NumPy 1-D array containing the data to be smoothed.

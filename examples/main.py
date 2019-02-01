@@ -62,6 +62,17 @@ ddx = np.zeros(q.shape)
 for i in range(0, q.shape[1]):
 	ddx[:, i], dx[:, i], x[:, i] = my_dmp.generate(w[:, i], f_q[0, i], f_q[-1, i], t, s, psv)
 
+# Adapt using Reinforcement Learning
+x_r = np.zeros(q.shape)
+dx_r = np.zeros(q.shape)
+ddx_r = np.zeros(q.shape)
+
+goal = np.array([0, 0, 0, 0, 0, 0])
+samples = 10
+rate = 0.5
+
+for i in range(0, q.shape[1]):
+	ddx_r[:, i], dx_r[:, i], x_r[:, i] = my_dmp.adapt(w[:, i], x[0, i], goal[i], t, s, psv, samples, rate)
 
 # Plot functions
 Plot.position(t, f_q, x)
