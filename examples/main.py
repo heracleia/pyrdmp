@@ -44,8 +44,12 @@ for i in range(0, q.shape[1]):
 	f_dq[:, i] = DMP.vel(f_q[:, i], t)
 	f_ddq[:, i] = DMP.vel(f_dq[:, i], t)
 
+Plot.position(q, f_q)
+Plot.velocity(q, t, dq, f_dq)
+Plot.acceleration(q, t, ddq, f_ddq)
 
-
+Plot.show_all()
+'''
 # Ploting functions
 
 plt.figure(1)
@@ -68,3 +72,4 @@ for i in range(0, q.shape[1]):
 	plt.plot(t, ddq[:, i], 'b')
 	plt.plot(t, f_ddq[:, i], 'r')
 plt.show()
+'''
