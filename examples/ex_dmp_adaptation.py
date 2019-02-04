@@ -1,6 +1,8 @@
-from dmp import DynamicMovementPrimitive as DMP
+#!/usr/bin/env python3
+
+from pyrdmp.dmp import DynamicMovementPrimitive as DMP
 import numpy as np
-from plots import plot as Plot
+from pyrdmp.plots import plot as Plot
 
 # Initialize the DMP class
 my_dmp = DMP(20, 20, 0)
@@ -10,7 +12,7 @@ window = 5
 blends = 10
 
 # Load the demo data
-data = DMP.load_demo("demos/demo12.txt")
+data = DMP.load_demo("data/demo12.txt")
 
 # Obtain the joint position data and the time vector
 t, q = DMP.parse_demo(data)
