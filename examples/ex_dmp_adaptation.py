@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from pyrdmp.dmp import DynamicMovementPrimitive as DMP
-from pyrdmp.plots import plot as Plot
+from pyrdmp.plots import *
 from pyrdmp.utils import *
 import numpy as np
 
@@ -82,5 +82,5 @@ for i in range(0, q.shape[1]):
 print('Adaptation complete')
 
 # Plot functions
-Plot.comparison(t, f_q, x, x_r)
-Plot.show_all()
+comparison(t, f_q, x, x_r)
+show_all()

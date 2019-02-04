@@ -19,8 +19,8 @@ def parse_demo(data):
     return data[:, 0], data[:, 1:8]
 
 # Load the data contained in the given file name.
-def load_demo(fileName):
-    return np.loadtxt(fileName, dtype=float, delimiter=',', skiprows=1)
+def load_demo(filename):
+    return np.loadtxt(filename, dtype=float, delimiter=',', skiprows=1)
 
 # Calculate psi (gaussian) based on its height, center, and state
 def psi(height, center, state):
@@ -37,7 +37,7 @@ def vel(q, t):
 def blend_trajectory(q, dq, time, blends):
 
     tj = np.zeros(len(time))
-    window = len(time)//blends-1
+    window = len(time)//blends-1 #TODO: Possible divide by /(blends - 1)
 
     up = 0
     down = window
@@ -45,12 +45,12 @@ def blend_trajectory(q, dq, time, blends):
     for i in range(0, blends):
 
         if i == blends-1:
-            pad = len(time)-down-1
+            pad = len(time) - down - 1
             window = window+pad
             down = down+pad
 
         c = coefficient(q[up], q[down], dq[up], dq[down], time[window-1])
-        tj[down - window:down + 1] = trajectory(c, time[0:window+1])
+        tj[down-window : down+1] = trajectory(c, time[0 : window+1])
 
         up = down + 1
         down += window
@@ -66,8 +66,8 @@ def coefficient(q_s, q_f, dq_s, dq_f, t):
 
     alpha[0] = q_s
     alpha[1] = dq_s
-    alpha[2] = np.divide(np.multiply(3, q_f-q_s), t_2nd)-np.divide(np.multiply(2, dq_s), t)-np.divide(dq_f, t)
-    alpha[3] = np.divide(np.multiply(-2, q_f-q_s), t_3rd)+np.divide(dq_f+dq_s, t_2nd)
+    alpha[2] = 3*(q_f - q_s)/t_2nd - 2*dq_s/t - dq_f/t
+    alpha[3] = -2*(q_f - q_s)/t_3rd + (dq_f+dq_s)/t_2nd
 
     return alpha
 
@@ -78,7 +78,7 @@ def trajectory(alpha, t):
     for i in range(0, len(t)):
         t_2nd = np.power(t[i], 2)
         t_3rd = np.power(t[i], 3)
-        tj[i] = alpha[0]+np.multiply(alpha[1], t[i])+np.multiply(alpha[2], t_2nd)+np.multiply(alpha[3], t_3rd)
+        tj[i] = alpha[0] + alpha[1]*t[i] + alpha[2]*t_2nd + alpha[3]*t_3rd
 
     return tj
 
