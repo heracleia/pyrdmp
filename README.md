@@ -16,4 +16,4 @@ Install the `pyrdmp` package locally with: `pip install .`
 ## Examples
 
 You can run examples by navigating to `examples/` 
-and running `./ex_dmp_adaptation` 
+and running `./ex_dmp_adaptation.py` 
