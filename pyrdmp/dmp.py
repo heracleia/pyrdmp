@@ -138,9 +138,10 @@ class DynamicMovementPrimitive:
     def adapt(self, w, x0, g, t, s, psv, samples, rate):
 
         # Initialize the action variables
-        actions = np.ones(samples, self.ng)
-        exploration = np.zeros(samples, self.ng)
+        actions = np.zeros((samples, self.ng))
+        exploration = np.zeros((samples, self.ng))
         a = w
+        tau = t[-1]
 
         # Flag which acts as a stop condition
         flag = 0
@@ -149,7 +150,7 @@ class DynamicMovementPrimitive:
 
             for i in range(0, samples):
                 for j in range(0, self.ng):
-                    exploration[i, j] = np.random.normal(0, np.std(psv[j, :], a[j]), 1)
+                    exploration[i, j] = np.random.normal(0, np.std(psv[j, :]*a[j]))
 
             for i in range(0, samples):
                 actions[i, :] = a + exploration[i, :]
@@ -160,23 +161,23 @@ class DynamicMovementPrimitive:
             ddx = np.zeros((len(t), samples))
 
             for i in range(0, samples):
-                ddx[:, i], dx[:, i], x[:, i] = self.generate(actions[:, i], x0, g, t, s, psv)
+                ddx[:, i], dx[:, i], x[:, i] = self.generate(actions[i, :], x0, g, t, s, psv)
 
             # Estimate the Q values
             Q = np.zeros(samples)
 
             for i in range(0, samples):
-                sum =0
+                sum = 0
                 for j in range(0, len(t)):
-                    sum = sum + DynamicMovementPrimitive.reward(g, x[j, i], t[j])
+                    sum = sum + DynamicMovementPrimitive.reward(g, x[j, i], t[j], tau)
                 Q[i] = sum
 
             # Sample the highest Q values to adapt the action parameters
-            sorted_samples = np.argsort(Q)[:np.floor(samples*rate)]
+            sorted_samples = np.argsort(Q)[::-1][:np.floor(samples*rate).astype(int)]
 
             # Update the action parameter
             sumQ_y = 0
-            sumQ_x = np.zeros(samples)
+            sumQ_x = np.zeros(a.shape)
 
             for i in sorted_samples:
                 sumQ_y = sumQ_y + Q[i]
@@ -185,23 +186,22 @@ class DynamicMovementPrimitive:
             a = a + sumQ_x/sumQ_y
 
             if np.abs(x[-1, sorted_samples[0]])-g < 0.1:
-                flag=1
+                flag = 1
 
-        return ddx, dx, x
+        return ddx[:, sorted_samples[0]], dx[:, sorted_samples[0]], x[:, sorted_samples[0]]
 
     # Reward function
     @staticmethod
-    def reward(goal, position, time):
+    def reward(goal, position, time, tau):
 
         w = 0.5
         thres = 0.01
         temp = goal - position
-        tau = time[-1]
 
         if np.abs(time - tau) < thres:
-            rwd = w*np.exp(-np.sqrt(temp.dot(temp.T)))
+            rwd = w*np.exp(-np.abs(np.power(temp, 2)))
         else:
-            rwd = (1-w) * np.exp(-np.sqrt(temp.dot(temp.T)))/tau
+            rwd = (1-w) * np.exp(-np.abs(np.power(temp, 2)))/tau
 
         return rwd
 

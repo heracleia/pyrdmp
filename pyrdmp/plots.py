@@ -17,7 +17,7 @@ class plot:
         figure = plt.figure()
         figure.suptitle("Position")
         for i in range(q.shape[1]):
-            plt.subplot(q.shape[1], 1, i)
+            plt.subplot(q.shape[1], 1, i+1)
             plt.plot(t, q[:, i], 'b')
             plt.plot(t, f_q[:, i], 'r')
         return figure
@@ -27,7 +27,7 @@ class plot:
         figure = plt.figure()
         figure.suptitle("Velocity")
         for i in range(dq.shape[1]):
-            plt.subplot(dq.shape[1], 1, i)
+            plt.subplot(dq.shape[1], 1, i+1)
             plt.plot(t, dq[:, i], 'b')
             plt.plot(t, f_dq[:, i], 'r')
         return figure
@@ -37,9 +37,21 @@ class plot:
         figure = plt.figure()
         figure.suptitle("Acceleration")
         for i in range(ddq.shape[1]):
-            plt.subplot(ddq.shape[1], 1, i)
+            plt.subplot(ddq.shape[1], 1, i+1)
             plt.plot(t, ddq[:, i], 'b')
             plt.plot(t, f_ddq[:, i], 'r')
+
+    @staticmethod
+    def comparison(t, x, y, z):
+        figure = plt.figure()
+        figure.suptitle("Position")
+        for i in range(x.shape[1]):
+            plt.subplot(x.shape[1], 1, i+1)
+            plt.plot(t, x[:, i], 'b')
+            plt.plot(t, y[:, i], 'r')
+            plt.plot(t, z[:, i], 'k')
+        return figure
+
 
     @staticmethod
     def show_all():

@@ -10,7 +10,7 @@ window = 5
 blends = 10
 
 # Load the demo data
-data = DMP.load_demo("demos/demo1.txt")
+data = DMP.load_demo("demos/demo12.txt")
 
 # Obtain the joint position data and the time vector
 t, q = DMP.parse_demo(data)
@@ -67,13 +67,17 @@ x_r = np.zeros(q.shape)
 dx_r = np.zeros(q.shape)
 ddx_r = np.zeros(q.shape)
 
-goal = np.array([0, 0, 0, 0, 0, 0])
+goal = np.array([0, np.pi, 0, np.pi, 0, np.pi, np.pi/3])
 samples = 10
 rate = 0.5
+
+print('Adaptation start')
 
 for i in range(0, q.shape[1]):
 	ddx_r[:, i], dx_r[:, i], x_r[:, i] = my_dmp.adapt(w[:, i], x[0, i], goal[i], t, s, psv, samples, rate)
 
+print('Adaptation complete')
+
 # Plot functions
-Plot.position(t, f_q, x)
+Plot.comparison(t, f_q, x, x_r)
 Plot.show_all()
