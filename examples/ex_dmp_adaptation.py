@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 from pyrdmp.dmp import DynamicMovementPrimitive as DMP
-import numpy as np
 from pyrdmp.plots import plot as Plot
+from pyrdmp.utils import *
+import numpy as np
 
 # Initialize the DMP class
 my_dmp = DMP(20, 20, 0)
@@ -12,10 +13,10 @@ window = 5
 blends = 10
 
 # Load the demo data
-data = DMP.load_demo("data/demo12.txt")
+data = load_demo("data/demo12.txt")
 
 # Obtain the joint position data and the time vector
-t, q = DMP.parse_demo(data)
+t, q = parse_demo(data)
 
 # Get the phase from the time vector
 s = my_dmp.phase(t)
@@ -24,16 +25,16 @@ s = my_dmp.phase(t)
 psv = my_dmp.distributions(s)
 
 # Normalize the time vector
-t = DMP.normalize_vector(t)
+t = normalize_vector(t)
 
 # Compute velocity and acceleration
 dq = np.zeros(q.shape)
 ddq = np.zeros(q.shape)
 
 for i in range(0, q.shape[1]):
-	q[:, i] = DMP.smooth(q[:, i], window)
-	dq[:, i] = DMP.vel(q[:, i], t)
-	ddq[:, i] = DMP.vel(dq[:, i], t)
+	q[:, i] = smooth_trajectory(q[:, i], window)
+	dq[:, i] = vel(q[:, i], t)
+	ddq[:, i] = vel(dq[:, i], t)
 
 # Filter the position velocity and acceleration signals
 f_q = np.zeros(q.shape)
@@ -41,9 +42,9 @@ f_dq = np.zeros(q.shape)
 f_ddq = np.zeros(q.shape)
 
 for i in range(0, q.shape[1]):
-	f_q[:, i] = DMP.blends(q[:, i], dq[:, i], t, blends)
-	f_dq[:, i] = DMP.vel(f_q[:, i], t)
-	f_ddq[:, i] = DMP.vel(f_dq[:, i], t)
+	f_q[:, i] = blend_trajectory(q[:, i], dq[:, i], t, blends)
+	f_dq[:, i] = vel(f_q[:, i], t)
+	f_ddq[:, i] = vel(f_dq[:, i], t)
 
 # Imitation Learning
 ftarget = np.zeros(q.shape)

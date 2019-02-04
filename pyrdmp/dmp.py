@@ -4,7 +4,7 @@
 '''
 
 import numpy as np
-
+from pyrdmp.utils import psi
 
 class DynamicMovementPrimitive:
 
@@ -45,7 +45,7 @@ class DynamicMovementPrimitive:
 
         for i in range(0, self.ng):
             for j in range(0, len(s)):
-                psv[i][j] = DynamicMovementPrimitive.psi(h, c[i], np.divide(s[j], d[0]))
+                psv[i][j] = psi(h, c[i], np.divide(s[j], d[0]))
 
         return psv
 
@@ -169,7 +169,7 @@ class DynamicMovementPrimitive:
             for i in range(0, samples):
                 sum = 0
                 for j in range(0, len(t)):
-                    sum = sum + DynamicMovementPrimitive.reward(g, x[j, i], t[j], tau)
+                    sum = sum + self.reward(g, x[j, i], t[j], tau)
                 Q[i] = sum
 
             # Sample the highest Q values to adapt the action parameters
@@ -191,8 +191,7 @@ class DynamicMovementPrimitive:
         return ddx[:, sorted_samples[0]], dx[:, sorted_samples[0]], x[:, sorted_samples[0]]
 
     # Reward function
-    @staticmethod
-    def reward(goal, position, time, tau):
+    def reward(self, goal, position, time, tau):
 
         w = 0.5
         thres = 0.01
@@ -204,100 +203,4 @@ class DynamicMovementPrimitive:
             rwd = (1-w) * np.exp(-np.abs(np.power(temp, 2)))/tau
 
         return rwd
-
-    # Function that smooths a trajectory
-    # a: NumPy 1-D array containing the data to be smoothed.
-    # window: smoothing window size needs, which must be odd number.
-    @staticmethod
-    def smooth(a, window):
-        out0 = np.convolve(a, np.ones(window, dtype=int), 'valid')/window
-        r = np.arange(1, window-1, 2)
-        start = np.cumsum(a[:window-1])[::2]/r
-        stop = (np.cumsum(a[:-window:-1])[::2]/r)[::-1]
-        return np.concatenate((start, out0, stop))
-
-    # Returns a normalized numpy array
-    @staticmethod
-    def normalize_vector(v):
-        return np.linspace(0, v[len(v) - 1], len(v))
-
-    # Get the time and joint position vectors from the demonstration data
-    @staticmethod
-    def parse_demo(data):
-        return data[:, 0], data[:, 1:8]
-
-    # Load the data contained in the given file name.
-    @staticmethod
-    def load_demo(fileName):
-        return np.loadtxt(fileName, dtype=float, delimiter=',', skiprows=1)
-
-    # Calculate psi (gaussian) based on its height, center, and state
-    @staticmethod
-    def psi(height, center, state):
-        return np.exp((-height)*(np.power(state-center, 2)))
-
-    # Calculate the velocity given the position and time
-    @staticmethod
-    def vel(q, t):
-        dq = np.zeros(len(q))
-        for i in range(0, len(q)-1):
-            dq[i+1] = (q[i+1]-q[i])/(t[i+1]-t[i])
-        return dq
-
-    #  Add parabolic blends to a trajectory
-    @staticmethod
-    def blends(q, dq, time, blends):
-
-        tj = np.zeros(len(time))
-        window = len(time)//blends-1
-
-        up = 0
-        down = window
-
-        for i in range(0, blends):
-
-            if i == blends-1:
-                pad = len(time)-down-1
-                window = window+pad
-                down = down+pad
-
-            c = DynamicMovementPrimitive.coefficient(q[up], q[down], dq[up], dq[down], time[window-1])
-            tj[down - window:down + 1] = DynamicMovementPrimitive.trajectory(c, time[0:window+1])
-
-            up = down+1
-            down = down+window
-
-        return tj
-
-    #  Perform polynomial fitting
-    @staticmethod
-    def coefficient(q_s, q_f, dq_s, dq_f, t):
-        alpha = np.zeros(4)
-
-        t_2nd = np.power(t, 2)
-        t_3rd = np.power(t, 3)
-
-        alpha[0] = q_s
-        alpha[1] = dq_s
-        alpha[2] = np.divide(np.multiply(3, q_f-q_s), t_2nd)-np.divide(np.multiply(2, dq_s), t)-np.divide(dq_f, t)
-        alpha[3] = np.divide(np.multiply(-2, q_f-q_s), t_3rd)+np.divide(dq_f+dq_s, t_2nd)
-
-        return alpha
-
-    #  Perform polynomial fitting
-    @staticmethod
-    def trajectory(alpha, t):
-        tj = np.zeros(len(t))
-
-        for i in range(0, len(t)):
-            t_2nd = np.power(t[i], 2)
-            t_3rd = np.power(t[i], 3)
-            tj[i] = alpha[0]+np.multiply(alpha[1], t[i])+np.multiply(alpha[2], t_2nd)+np.multiply(alpha[3], t_3rd)
-
-        return tj
-
-
-
-
-
 
