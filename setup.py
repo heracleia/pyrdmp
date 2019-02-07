@@ -7,7 +7,7 @@ with open('requirements.txt') as f:
     required = f.read().splitlines()
 
 setup(name='pyrdmp',
-      version='0.1.0',
+      version='0.1.1',
       description='Python Library for Reinforced Dynamic Movement Primitives',
       url='https://github.com/Heracleia/pyrdmp',
       author='Michail Theofanidis, Joe Cloud, James Brady',

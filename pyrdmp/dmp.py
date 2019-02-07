@@ -148,7 +148,7 @@ class DynamicMovementPrimitive:
 
             a += sumQ_x/sumQ_y
 
-            if np.abs(x[-1, sorted_samples[0]])-g < 0.1:
+            if np.abs(x[-1, sorted_samples[0]] - g) < 0.1:
                 met_threshold = True
 
         return ddx[:, sorted_samples[0]], dx[:, sorted_samples[0]], x[:, sorted_samples[0]]
