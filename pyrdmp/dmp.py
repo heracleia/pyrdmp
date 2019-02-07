@@ -68,7 +68,7 @@ class DynamicMovementPrimitive:
             f_target[i] = np.power(tau, 2)*ddx[i] - self.a*(self.b*(g - x[i]) - tau*dx[i]) + mod
 
         # Regression
-        w = [(sigma.T @ np.diag(p) @ f_target)/(sigma.T @ np.diag(p) @ sigma) for p in psv]
+        w = [reduce(np.matmul, [sigma.T, np.diag(p), f_target])/reduce(np.matmul, [sigma.T, np.diag(p), sigma]) for p in psv]
 
         return f_target, np.array(w)
 
