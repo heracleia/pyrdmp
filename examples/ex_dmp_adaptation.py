@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 from pyrdmp.dmp import DynamicMovementPrimitive as DMP
 from pyrdmp.plots import *
 from pyrdmp.utils import *
@@ -28,8 +29,7 @@ psv = my_dmp.distributions(s)
 t = normalize_vector(t)
 
 # Compute velocity and acceleration
-dq = np.zeros(q.shape)
-ddq = np.zeros(q.shape)
+dq, ddq = np.zeros((2, q.shape[0], q.shape[1]))
 
 for i in range(0, q.shape[1]):
 	q[:, i] = smooth_trajectory(q[:, i], window)
@@ -37,9 +37,7 @@ for i in range(0, q.shape[1]):
 	ddq[:, i] = vel(dq[:, i], t)
 
 # Filter the position velocity and acceleration signals
-f_q = np.zeros(q.shape)
-f_dq = np.zeros(q.shape)
-f_ddq = np.zeros(q.shape)
+f_q, f_dq, f_ddq = np.zeros((3, q.shape[0], q.shape[1]))
 
 for i in range(0, q.shape[1]):
 	f_q[:, i] = blend_trajectory(q[:, i], dq[:, i], t, blends)
@@ -58,15 +56,13 @@ for i in range(0, q.shape[1]):
 print('Imitation done')
 
 # Generate the Learned trajectory
-x = np.zeros(q.shape)
-dx = np.zeros(q.shape)
-ddx = np.zeros(q.shape)
+x, dx, ddx = np.zeros((3, q.shape[0], q.shape[1]))
 
 for i in range(0, q.shape[1]):
 	ddx[:, i], dx[:, i], x[:, i] = my_dmp.generate(w[:, i], f_q[0, i], f_q[-1, i], t, s, psv)
 
 # Adapt using Reinforcement Learning
-x_r = np.zeros(q.shape)
+x_r, dx_r, ddx_r = np.zeros((3, q.shape[0], q.shape[1]))
 dx_r = np.zeros(q.shape)
 ddx_r = np.zeros(q.shape)
 

@@ -1,14 +1,6 @@
 import matplotlib.pyplot as plt
-from matplotlib import cm
+from matplotlib import cm, rc
 
-'''
-plt.rcParams['text.latex.preamble']=[r"\usepackage{lmodern}"]
-params = {'text.usetex' : True,
-          'font.size' : 11,
-          'font.family' : 'lmodern',
-          }
-plt.rcParams.update(params) 
-'''
 
 def phase(s):
     figure = plt.figure()
@@ -54,13 +46,12 @@ def comparison(t, x, y, z):
     return figure
 
 def gaussian(s, psv, w):
-
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
     figure = plt.figure()
     figure.suptitle("Gaussians")
     for i in range(w.shape[1]):
         plt.subplot(w.shape[1], 1, i + 1)
-	for j in range(psv.shape[0]):
+        for j in range(psv.shape[0]):
             plt.plot(s, psv[j, :] * w[j, i], color=colors[j % len(colors)])
     return figure
 

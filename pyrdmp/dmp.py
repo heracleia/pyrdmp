@@ -31,7 +31,7 @@ class DynamicMovementPrimitive:
         return np.exp((-self.as_deg) * np.linspace(0, 1.0, len(time))).T
 
     # Generate a gaussian distribution
-    def distributions(self, s, h = 1):
+    def distributions(self, s, h=1):
 
         # Find the centers of the Gaussian in the s domain
         step = (s[0] - s[-1])/(self.ng - 1)
@@ -68,7 +68,7 @@ class DynamicMovementPrimitive:
             f_target[i] = np.power(tau, 2)*ddx[i] - self.a*(self.b*(g - x[i]) - tau*dx[i]) + mod
 
         # Regression
-        w = [reduce(np.matmul, [sigma.T, np.diag(p), f_target])/reduce(np.matmul, [sigma.T, np.diag(p), sigma]) for p in psv]
+        w = [sigma.T.dot(np.diag(p)).dot(f_target)/(sigma.T.dot(np.diag(p)).dot(sigma)) for p in psv]
 
         return f_target, np.array(w)
 
