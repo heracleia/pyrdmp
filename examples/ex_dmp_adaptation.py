@@ -9,7 +9,7 @@ import numpy as np
 
 def main():
     parser = argparse.ArgumentParser(description="Use Reinforced DMP to adapt to new goals")
-    parser.add_argument('-g', '--gain', type=float, default=20.0,
+    parser.add_argument('-ga', '--gain', type=float, default=20.0,
             help="Set the gain of the DMP transformation system. Secondary gain will be calculated.")
     parser.add_argument('-ng', '--num-gaussians', type=int, default=20,
             help="Number of Gaussians")
@@ -27,6 +27,12 @@ def main():
             help="Window size for filtering")
     parser.add_argument('-b', '--blends', type=int, default=10,
             help="Number of blends for filtering")
+    parser.add_argument('-s', '--samples', type=int, default=10,
+            help="Number of paths for exploration")
+    parser.add_argument('-r', '--rate', type=float, default=0.5,
+            help="Number of possible paths to keep")
+    parser.add_argument('-g', '--goal', nargs='+', type=float, default=[0, 1, 0, 1, 0, 1, 0],
+            help="New position goal (joint space)")
     parser.set_defaults(show_plots=True)
     arg = parser.parse_args()
     
@@ -86,14 +92,10 @@ def main():
     dx_r = np.zeros(q.shape)
     ddx_r = np.zeros(q.shape)
     
-    goal = np.array([0, np.pi, 0, np.pi, 0, np.pi, np.pi/3])
-    samples = 10
-    rate = 0.5
-    
     print('Adaptation start')
     
     for i in range(q.shape[1]):
-    	ddx_r[:, i], dx_r[:, i], x_r[:, i] = my_dmp.adapt(w[:, i], x[0, i], goal[i], t, s, psv, samples, rate)
+    	ddx_r[:, i], dx_r[:, i], x_r[:, i] = my_dmp.adapt(w[:, i], x[0, i], arg.goal[i], t, s, psv, arg.samples, arg.rate)
     
     print('Adaptation complete')
     
