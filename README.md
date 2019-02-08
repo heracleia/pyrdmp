@@ -19,6 +19,9 @@ Otherwise, releases can be install with `pip install pyrdmp` or by cloning the r
 You can run examples by navigating to `examples/` 
 and running `./ex_dmp_adaptation.py` 
 
+`ex_dmp_adaptation.py` includes an argparser. 
+A description of the available commands can be found with: `python ex_dmp_adaptation.py --help`
+
 ## Notes
 
 Tested on Ubuntu 16.04, 14.04, and 12.04

@@ -34,11 +34,9 @@ class DynamicMovementPrimitive:
     def distributions(self, s, h=1):
 
         # Find the centers of the Gaussian in the s domain
-        step = (s[0] - s[-1])/(self.ng - 1)
-        c = np.arange(min(s), max(s)+step, step)
+        c = np.linspace(min(s), max(s), self.ng)
         d = c[1] - c[0]
         c /= d
-
         # Calculate every gaussian
         psv = np.array([[psi(h, _c, _s/d) for _s in s] for _c in c]) 
 
@@ -57,7 +55,7 @@ class DynamicMovementPrimitive:
         for i in range(0, len(time)):
 
             # Add stabilization term
-            if self.stb == 1:
+            if self.stb:
                 mod = self.b*(g - x0)*s[i]
                 sigma[i] = (g - x0)*s[i]
             else:
@@ -92,7 +90,7 @@ class DynamicMovementPrimitive:
                 dt = time[i] - time[i - 1]
 
             # Add stabilization term
-            if self.stb == 1:
+            if self.stb:
                 mod = self.b*(g - x0)*s[i]
                 sigma[i] = (g - x0)*s[i]
             else:
