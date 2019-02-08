@@ -138,21 +138,21 @@ class DynamicMovementPrimitive:
             Q = [sum([self.reward(g, x[j, i], t[j], tau) for j in range(len(t))]) for i in range(samples)]
 
             # Sample the highest Q values to adapt the action parameters
-            sorted_samples = np.argsort(Q)[::-1][:np.floor(samples*rate).astype(int)]
+            sort_Q = np.argsort(Q)[::-1][:np.floor(samples*rate).astype(int)]
 
             # Update the action parameter
-            sumQ_y = sum([Q[i] for i in sorted_samples])
-            sumQ_x = sum([exploration[i]*Q[i] for i in sorted_samples])
+            sumQ_y = sum([Q[i] for i in sort_Q])
+            sumQ_x = sum([exploration[i]*Q[i] for i in sort_Q])
 
             a += sumQ_x/sumQ_y
 
-            if np.abs(x[-1, sorted_samples[0]] - g) < 0.1:
+            if np.abs(x[-1, sort_Q[0]] - g) < 0.1:
                 met_threshold = True
 
-        return ddx[:, sorted_samples[0]], dx[:, sorted_samples[0]], x[:, sorted_samples[0]]
+        return ddx[:, sort_Q[0]], dx[:, sort_Q[0]], x[:, sort_Q[0]], actions[sort_Q[0]]
 
     # Reward function
-    def reward(self, goal, position, time, tau, w = 0.5, threshold = 0.01):
+    def reward(self, goal, position, time, tau, w=0.5, threshold=0.01):
 
         dist = goal - position
 
