@@ -5,6 +5,7 @@
 
 import numpy as np
 from pyrdmp.utils import psi
+import matplotlib.pyplot as plt
 
 class DynamicMovementPrimitive:
 
@@ -117,6 +118,8 @@ class DynamicMovementPrimitive:
     # Adaptation using reinforcement learning
     def adapt(self, w, x0, g, t, s, psv, samples, rate):
 
+        print('New Trajectory')
+
         # Initialize the action variables
         a = w
         tau = t[-1]
@@ -126,9 +129,9 @@ class DynamicMovementPrimitive:
 
         while not met_threshold:
 
-            exploration = np.array([[np.random.normal(np.std(psv[j]*a[j])) 
+            exploration = np.array([[np.random.normal(0, np.std(psv[j]*a[j]))
                     for j in range(self.ng)] for i in range(samples)])
-            
+
             actions = np.array([a + e for e in exploration])
 
             # Generate new rollouts
@@ -146,20 +149,29 @@ class DynamicMovementPrimitive:
 
             a += sumQ_x/sumQ_y
 
-            if np.abs(x[-1, sort_Q[0]] - g) < 0.1:
+            """
+            for i in range(x.shape[1]):
+                plt.plot(t, x[:, i], 'k')
+
+            plt.show()
+            """
+
+            print(g)
+            print(x[-1, sort_Q[0]])
+            if np.abs(x[-1, sort_Q[0]] - g) < 0.01:
                 met_threshold = True
 
         return ddx[:, sort_Q[0]], dx[:, sort_Q[0]], x[:, sort_Q[0]], actions[sort_Q[0]]
 
     # Reward function
-    def reward(self, goal, position, time, tau, w=0.5, threshold=0.01):
+    def reward(self, goal, position, time, tau, w=0.9, threshold=0.01):
 
         dist = goal - position
 
         if np.abs(time - tau) < threshold:
-            rwd = w*np.exp(-np.abs(np.power(dist, 2)))
+            rwd = w*np.exp(-np.sqrt(dist*dist.T))
         else:
-            rwd = (1-w) * np.exp(-np.abs(np.power(dist, 2)))/tau
+            rwd = (1-w) * np.exp(-np.sqrt(dist*dist.T))/tau
 
         return rwd
 
