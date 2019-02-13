@@ -149,15 +149,6 @@ class DynamicMovementPrimitive:
 
             a += sumQ_x/sumQ_y
 
-            """
-            for i in range(x.shape[1]):
-                plt.plot(t, x[:, i], 'k')
-
-            plt.show()
-            """
-
-            print(g)
-            print(x[-1, sort_Q[0]])
             if np.abs(x[-1, sort_Q[0]] - g) < 0.01:
                 met_threshold = True
 

@@ -31,7 +31,8 @@ def main():
                         help="Number of paths for exploration")
     parser.add_argument('-r', '--rate', type=float, default=0.5,
                         help="Number of possible paths to keep")
-    parser.add_argument('-g', '--goal', nargs='+', type=float, default=[-2.7, 3.4, 0.6, -0.3, 1.8, -2.7, -1.35],
+    parser.add_argument('-g', '--goal', nargs='+', type=float, 
+                        default=[-2.7, 3.4, 0.6, -0.3, 1.8, -2.7, -1.35],
                         help="New position goal (joint space)")
     parser.set_defaults(show_plots=True)
     arg = parser.parse_args()
@@ -94,7 +95,8 @@ def main():
     print('Adaptation start')
 
     for i in range(q.shape[1]):
-        ddx_r[:, i], dx_r[:, i], x_r[:, i], w_a[:, i] = my_dmp.adapt(w[:, i], x[0, i], arg.goal[i], t, s, psv, arg.samples, arg.rate)
+        ddx_r[:, i], dx_r[:, i], x_r[:, i], w_a[:, i] = my_dmp.adapt(w[:, i], x[0, i], 
+                arg.goal[i], t, s, psv, arg.samples, arg.rate)
 
     print('Adaptation complete')
 
