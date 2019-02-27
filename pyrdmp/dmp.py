@@ -118,7 +118,7 @@ class DynamicMovementPrimitive:
     # Adaptation using reinforcement learning
     def adapt(self, w, x0, g, t, s, psv, samples, rate):
 
-        print('New Trajectory')
+        print('Trajectory adapted')
 
         # Initialize the action variables
         a = w
@@ -126,8 +126,12 @@ class DynamicMovementPrimitive:
 
         # Flag which acts as a stop condition
         met_threshold = False
+        counter = 0
+        gain = []
 
         while not met_threshold:
+
+            counter += 1
 
             exploration = np.array([[np.random.normal(0, np.std(psv[j]*a[j]))
                     for j in range(self.ng)] for i in range(samples)])
@@ -135,7 +139,7 @@ class DynamicMovementPrimitive:
             actions = np.array([a + e for e in exploration])
 
             # Generate new rollouts
-            ddx, dx, x = np.transpose([self.generate(act, x0, g, t, s, psv) for act in actions], (1,2,0))
+            ddx, dx, x = np.transpose([self.generate(act, x0, g, t, s, psv) for act in actions], (1, 2, 0))
 
             # Estimate the Q values
             Q = [sum([self.reward(g, x[j, i], t[j], tau) for j in range(len(t))]) for i in range(samples)]
@@ -147,12 +151,19 @@ class DynamicMovementPrimitive:
             sumQ_y = sum([Q[i] for i in sort_Q])
             sumQ_x = sum([exploration[i]*Q[i] for i in sort_Q])
 
+            # Update the policy parameters
             a += sumQ_x/sumQ_y
 
+            if counter == 1:
+                gain.append(Q[sort_Q[0]])
+            else:
+                gain.append(Q[sort_Q[0]]+gain[counter-2])
+
+            # Stopping condition
             if np.abs(x[-1, sort_Q[0]] - g) < 0.01:
                 met_threshold = True
 
-        return ddx[:, sort_Q[0]], dx[:, sort_Q[0]], x[:, sort_Q[0]], actions[sort_Q[0]]
+        return ddx[:, sort_Q[0]], dx[:, sort_Q[0]], x[:, sort_Q[0]], actions[sort_Q[0]], np.array(gain)
 
     # Reward function
     def reward(self, goal, position, time, tau, w=0.9, threshold=0.01):

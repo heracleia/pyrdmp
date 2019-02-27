@@ -1,5 +1,6 @@
 import numpy as np
 
+
 # Function that smooths a trajectory
 # a: NumPy 1-D array containing the data to be smoothed.
 # window: smoothing window size needs, which must be odd number.
@@ -10,21 +11,26 @@ def smooth_trajectory(a, window):
     stop = (np.cumsum(a[:-window:-1])[::2]/r)[::-1]
     return np.concatenate((start, out0, stop))
 
+
 # Returns a normalized numpy array
 def normalize_vector(v):
     return np.linspace(0, v[len(v) - 1], len(v))
+
 
 # Get the time and joint position vectors from the demonstration data
 def parse_demo(data):
     return data[:, 0], data[:, 1:8]
 
+
 # Load the data contained in the given file name.
 def load_demo(filename):
     return np.loadtxt(filename, dtype=float, delimiter=',', skiprows=1)
 
+
 # Calculate psi (gaussian) based on its height, center, and state
 def psi(height, center, state):
     return np.exp((-height)*(np.power(state-center, 2)))
+
 
 # Calculate the velocity given the position and time
 def vel(q, t):
@@ -33,11 +39,12 @@ def vel(q, t):
         dq[i+1] = (q[i+1]-q[i])/(t[i+1]-t[i])
     return dq
 
+
 #  Add parabolic blends to a trajectory
 def blend_trajectory(q, dq, time, blends):
 
     tj = np.zeros(len(time))
-    window = len(time)//blends-1 #TODO: Possible divide by /(blends - 1)
+    window = len(time)//blends-1
 
     up = 0
     down = window
@@ -57,6 +64,7 @@ def blend_trajectory(q, dq, time, blends):
 
     return tj
 
+
 #  Perform polynomial fitting
 def coefficient(q_s, q_f, dq_s, dq_f, t):
     alpha = np.zeros(4)
@@ -70,6 +78,7 @@ def coefficient(q_s, q_f, dq_s, dq_f, t):
     alpha[3] = -2*(q_f - q_s)/t_3rd + (dq_f+dq_s)/t_2nd
 
     return alpha
+
 
 #  Perform polynomial fitting
 def trajectory(alpha, t):

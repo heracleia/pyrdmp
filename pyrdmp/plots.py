@@ -61,5 +61,15 @@ def gaussian(s, psv, w, title):
     return figure
 
 
+def expected_return(gain):
+    figure = plt.figure()
+    figure.suptitle('Expected Return per episode')
+    for i in range(len(gain)):
+        plt.subplot(len(gain), 1, i + 1)
+        plt.plot(range(len(gain[i])), gain[i], i + 1)
+
+    return figure
+
+
 def show_all():
     plt.show()
