@@ -130,9 +130,6 @@ class DynamicMovementPrimitive:
         gain = []
 
         while not met_threshold:
-
-            counter += 1
-
             exploration = np.array([[np.random.normal(0, np.std(psv[j]*a[j]))
                     for j in range(self.ng)] for i in range(samples)])
 
@@ -154,16 +151,13 @@ class DynamicMovementPrimitive:
             # Update the policy parameters
             a += sumQ_x/sumQ_y
 
-            if counter == 1:
-                gain.append(Q[sort_Q[0]])
-            else:
-                gain.append(Q[sort_Q[0]]+gain[counter-2])
+            gain.append(Q[sort_Q[0]])
 
             # Stopping condition
             if np.abs(x[-1, sort_Q[0]] - g) < 0.01:
                 met_threshold = True
 
-        return ddx[:, sort_Q[0]], dx[:, sort_Q[0]], x[:, sort_Q[0]], actions[sort_Q[0]], np.array(gain)
+        return ddx[:, sort_Q[0]], dx[:, sort_Q[0]], x[:, sort_Q[0]], actions[sort_Q[0]], np.cumsum(gain)
 
     # Reward function
     def reward(self, goal, position, time, tau, w=0.9, threshold=0.01):

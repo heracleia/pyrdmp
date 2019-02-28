@@ -10,7 +10,7 @@ import numpy as np
 def main():
     parser = argparse.ArgumentParser(description="Use Reinforced DMP to adapt to new goals")
     parser.add_argument('-ga', '--gain', type=float, default=20.0,
-                        help="Set the gain of the DMP transformation system. Secondary gain will be calculated.")
+                        help="Set the gain of the DMP transformation system.")
     parser.add_argument('-ng', '--num-gaussians', type=int, default=20,
                         help="Number of Gaussians")
     parser.add_argument('-sb', '--stabilization', type=bool, default=False,
@@ -31,7 +31,8 @@ def main():
                         help="Number of paths for exploration")
     parser.add_argument('-r', '--rate', type=float, default=0.5,
                         help="Number of possible paths to keep")
-    parser.add_argument('-g', '--goal', nargs='+', type=float, default=[-2.7, 3.4, 0.6, -0.3, 1.8, -2.7, -1.35],
+    parser.add_argument('-g', '--goal', nargs='+', type=float, 
+                        default=[-2.7, 3.4, 0.6, -0.3, 1.8, -2.7, -1.35],
                         help="New position goal (joint space)")
     parser.set_defaults(show_plots=True)
     arg = parser.parse_args()
@@ -77,7 +78,8 @@ def main():
     print('Imitation start')
 
     for i in range(q.shape[1]):
-        ftarget[:, i], w[:, i] = my_dmp.imitate(f_q[:, i], f_dq[:, i], f_ddq[:, i], t, s, psv)
+        ftarget[:, i], w[:, i] = my_dmp.imitate(f_q[:, i], f_dq[:, i], 
+                f_ddq[:, i], t, s, psv)
 
     print('Imitation done')
 
@@ -85,21 +87,22 @@ def main():
     x, dx, ddx = np.zeros((3, q.shape[0], q.shape[1]))
 
     for i in range(q.shape[1]):
-        ddx[:, i], dx[:, i], x[:, i] = my_dmp.generate(w[:, i], f_q[0, i], f_q[-1, i], t, s, psv)
+        ddx[:, i], dx[:, i], x[:, i] = my_dmp.generate(w[:, i], f_q[0, i], 
+                f_q[-1, i], t, s, psv)
 
     # Adapt using Reinforcement Learning
-    x_r, dx_r, ddx_r = np.zeros((3, q.shape[0], q.shape[1]))
-    w_a = np.zeros((my_dmp.ng, q.shape[1]))
-    ep = []
-    gain = []
-
     print('Adaptation start')
 
-    for i in range(q.shape[1]):
-        ddx_r[:, i], dx_r[:, i], x_r[:, i], w_a[:, i], dummy1, dummy2 = my_dmp.adapt(w[:, i], x[0, i], arg.goal[i], t, s, psv, arg.samples, arg.rate)
-        ep.append(dummy1)
-        gain.append(dummy2)
+    x_r, dx_r, ddx_r = np.zeros((3, q.shape[0], q.shape[1]))
+    w_a = np.zeros((my_dmp.ng, q.shape[1]))
+    gain = []
 
+     
+    for i in range(q.shape[1]):
+        ddx_r[:, i], dx_r[:, i], x_r[:, i], w_a[:, i], g = my_dmp.adapt(w[:, i], 
+                x[0, i], arg.goal[i], t, s, psv, arg.samples, arg.rate)
+        gain.append(g)
+    
     print('Adaptation complete')
 
     # Plot functions
@@ -107,7 +110,7 @@ def main():
         plot.comparison(t, f_q, x, x_r)
         plot.gaussian(s, psv, w, "Initial Gaussian")
         plot.gaussian(s, psv, w_a, "Altered Gaussian")
-        plot.expected_return(gain, ep)
+        plot.expected_return(gain)
         plot.show_all()
 
 
