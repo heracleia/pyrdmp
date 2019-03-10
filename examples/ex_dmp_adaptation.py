@@ -107,7 +107,7 @@ def main():
 
     # Plot functions
     if arg.show_plots:
-        plot.comparison(t, f_q, x, x_r)
+        plot.comparison(t, None, x, x_r)
         plot.gaussian(s, psv, w, "Initial Gaussian")
         plot.gaussian(s, psv, w_a, "Altered Gaussian")
         plot.expected_return(gain)
