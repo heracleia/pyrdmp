@@ -49,14 +49,15 @@ def acceleration(t, ddq, f_ddq, title='Acceleration', directory='', save=True):
     return figure
 
 
-def comparison(t, x, y, z, labels=['NN','DMP','RL'], title='Position Comparison', directory='', save=True):
+def comparison(t, x=None, y=None, z=None, labels=['NN','DMP','RL'], title='Position Comparison', directory='', save=True):
     figure = plt.figure()
     figure.suptitle(title)
-    for i in range(x.shape[1]):
-        plt.subplot(x.shape[1], 1, i+1)
-        plt.plot(t, x[:, i], 'b', label=labels[0])
-        plt.plot(t, y[:, i], 'r', label=labels[1])
-        plt.plot(t, z[:, i], 'k', label=labels[2])
+    shp = max([v.shape[1] for v in [x,y,z] if v is not None])
+    for i in range(shp):
+        plt.subplot(shp, 1, i+1)
+        if x is not None: plt.plot(t, x[:, i], 'b', label=labels[0])
+        if y is not None: plt.plot(t, y[:, i], 'r', label=labels[1])
+        if z is not None: plt.plot(t, z[:, i], 'k', label=labels[2])
         plt.ylabel("${q_%s}^c$" % str(i + 1), fontsize=FONTSIZE)
         if i == 0: plt.legend(loc="upper right")
     figure.align_ylabels()
@@ -77,7 +78,7 @@ def gaussian(s, psv, w, title, directory='', save=True):
     return figure
 
 
-def expected_return(gain, title='Expected Return per episode', directory='', save=True):
+def expected_return(gain, title='Expected Return per Episode', directory='', save=True):
     figure = plt.figure()
     figure.suptitle(title)
     for i in range(len(gain)):
