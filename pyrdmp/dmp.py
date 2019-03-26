@@ -17,15 +17,17 @@ class DynamicMovementPrimitive:
         as_deg -- Degradation of the canonical system
         ng -- Number of Gaussian
         stb -- Stabilization term
+        obs -- use obstacle avoidance term
     """
 
-    def __init__(self, _a, _ng, _stb):
+    def __init__(self, _a, _ng, _stb, _obs=False):
        
         self.a = _a
         self.b = _a/4
         self.as_deg = _a/3
         self.ng = _ng
         self.stb = _stb
+        self.obs = _obs
 
     # Create the phase of the system using the time vector
     def phase(self, time):
@@ -44,13 +46,19 @@ class DynamicMovementPrimitive:
         return psv
 
     # Imitation Learning
-    def imitate(self, x, dx, ddx, time, s, psv):
+    def imitate(self, x, dx, ddx, time, s, psv, obstacles = []):
 
         # Initialize variables
-        sigma, f_target = np.zeros((2,len(time)))
+        sigma = np.zeros((len(time)))  
+        if x.ndim > 1:
+            f_target = np.zeros((len(time),len(x[0]))) 
+        else:
+            f_target = np.zeros((len(time)))
+
         g = x[-1]
         x0 = x[0]
         tau = time[-1]
+        p = 0
 
         # Compute ftarget
         for i in range(0, len(time)):
@@ -62,14 +70,25 @@ class DynamicMovementPrimitive:
             else:
                 mod = 0
                 sigma[i] = s[i]
+            
+            if self.obs:
+                p = self.avoid_obstacles(x[i], dx[i], obstacles)
 
+        
             # Check again in the future
-            f_target[i] = np.power(tau, 2)*ddx[i] - self.a*(self.b*(g - x[i]) - tau*dx[i]) + mod
+            f_target[i] = np.power(tau, 2)*ddx[i] - self.a*(self.b*(g - x[i]) - tau*dx[i]) + mod + p
 
         # Regression
         w = [sigma.T.dot(np.diag(p)).dot(f_target)/(sigma.T.dot(np.diag(p)).dot(sigma)) for p in psv]
 
         return f_target, np.array(w)
+
+    def avoid_obstacles(self,  x, dx, obstacles):
+        if len(obstacles) == 0:
+            return 0
+
+        return 0
+
 
     # Generate a trajectory
     def generate(self, w, x0, g, time, s, psv):
