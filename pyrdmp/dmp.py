@@ -20,7 +20,7 @@ class DynamicMovementPrimitive:
         obs -- use obstacle avoidance term
     """
 
-    def __init__(self, _a, _ng, _stb, _obs=False):
+    def __init__(self, _a, _ng, _stb, _obs=False, _obs_gamma=1000, _obs_beta=6.3662):
        
         self.a = _a
         self.b = _a/4
@@ -28,6 +28,8 @@ class DynamicMovementPrimitive:
         self.ng = _ng
         self.stb = _stb
         self.obs = _obs
+        self.obs_gamma = _obs_gamma
+        self.obs_beta = _obs_beta
 
     # Create the phase of the system using the time vector
     def phase(self, time):
@@ -46,7 +48,7 @@ class DynamicMovementPrimitive:
         return psv
 
     # Imitation Learning
-    def imitate(self, x, dx, ddx, time, s, psv, obstacles = []):
+    def imitate(self, x, dx, ddx, time, s, psv):
 
         # Initialize variables
         sigma = np.zeros((len(time)))  
@@ -58,7 +60,6 @@ class DynamicMovementPrimitive:
         g = x[-1]
         x0 = x[0]
         tau = time[-1]
-        p = 0
 
         # Compute ftarget
         for i in range(0, len(time)):
@@ -71,33 +72,35 @@ class DynamicMovementPrimitive:
                 mod = 0
                 sigma[i] = s[i]
             
-            if self.obs:
-                p = self.avoid_obstacles(x[i], dx[i], obstacles)
-
-        
             # Check again in the future
-            f_target[i] = np.power(tau, 2)*ddx[i] - self.a*(self.b*(g - x[i]) - tau*dx[i]) + mod + p
+            f_target[i] = np.power(tau, 2)*ddx[i] - self.a*(self.b*(g - x[i]) - tau*dx[i]) + mod
 
         # Regression
         w = [sigma.T.dot(np.diag(p)).dot(f_target)/(sigma.T.dot(np.diag(p)).dot(sigma)) for p in psv]
 
         return f_target, np.array(w)
 
-    def avoid_obstacles(self,  x, dx, obstacles):
-        if len(obstacles) == 0:
-            return 0
-
-        return 0
+    def avoid_obstacles(self,  x, dx, goal, obstacles):
+        p = np.zeros(x.shape)
+        
+        for obstacle in obstacles:
+            	p += 0 
+        return p
 
 
     # Generate a trajectory
-    def generate(self, w, x0, g, time, s, psv):
+    def generate(self, w, x0, g, time, s, psv, obstacles = []):
 
         # Initialize variables
-        ddx, dx, x, sigma, f_rep = np.zeros((5, len(time)))
+        sigma = np.zeros(len(time))
+        if w.ndim > 1:
+            ddx, dx, x, f_rep = np.zeros((4, len(time), len(w[0])))
+        else:
+            ddx, dx, x, f_rep = np.zeros((4, len(time)))
         tau = time[-1]
         dx_r = 0
         x_r = x0
+        p = 0
 
         for i in range(len(time)):
 
@@ -125,8 +128,12 @@ class DynamicMovementPrimitive:
             # Calculate the new control input
             f_rep[i] = p_sum/p_div*sigma[i]
 
+            if self.obs:
+                p = self.avoid_obstacles(x[i], dx[i], g, obstacles)
+
+        
             # Calculate the new trajectory
-            ddx_r = (self.a*(self.b*(g - x_r) - tau*dx_r) + f_rep[i] + mod)/np.power(tau, 2)
+            ddx_r = (self.a*(self.b*(g - x_r) - tau*dx_r) + f_rep[i] + mod + p)/np.power(tau, 2)
             dx_r += ddx_r*dt
             x_r += dx_r*dt
 

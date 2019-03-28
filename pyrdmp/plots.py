@@ -1,5 +1,7 @@
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import cm, rc
+from mpl_toolkits.mplot3d import Axes3D
 
 
 rc('text', usetex=True)
@@ -84,6 +86,19 @@ def expected_return(gain, title='Expected Return per Episode', directory='', sav
     for i in range(len(gain)):
         plt.subplot(len(gain), 1, i + 1)
         plt.plot(range(len(gain[i])), gain[i], i + 1)
+    if save: save_fig(figure, title, directory)
+    return figure
+
+
+def cartesian_history(cartesian, title='Cartesian History', directory='', save=True):
+    figure = plt.figure()
+    ax = figure.add_subplot(111, projection='3d')
+    for cart in cartesian:
+        ax.scatter(cart[:,0], cart[:,1], cart[:,2], 'b')
+    ax.text2D(0.05, 0.95, title, transform=ax.transAxes)
+    ax.set_xlabel('X axis')
+    ax.set_ylabel('Y axis')
+    ax.set_zlabel('Z axis')
     if save: save_fig(figure, title, directory)
     return figure
 
