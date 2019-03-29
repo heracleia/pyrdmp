@@ -20,7 +20,7 @@ class DynamicMovementPrimitive:
         obs -- use obstacle avoidance term
     """
 
-    def __init__(self, _a, _ng, _stb, _obs=False, _obs_gamma=1000, _obs_beta=6.3662):
+    def __init__(self, _a, _ng, _stb, _obs=False, _obs_gamma=1200, _obs_beta=6.3662):
        
         self.a = _a
         self.b = _a/4
@@ -80,15 +80,24 @@ class DynamicMovementPrimitive:
 
         return f_target, np.array(w)
 
-    def avoid_obstacles(self,  x, dx, goal, obstacles):
+    def avoid_obstacles(self,  x, dx, g, obstacles):
         p = np.zeros(x.shape)
         
-        for obstacle in obstacles:
-            	p += 0 
+        for o in obstacles[:,:3]:
+            if np.linalg.norm(dx) > 0.00005:
+                phi = np.arccos(np.dot(dx, o - x)/(np.linalg.norm(o - x)*np.linalg.norm(dx)))
+                if np.dot(dx, o - x) < 0: #BUG: This is 3d. 
+                    phi = -phi
+            	
+                dphi = self.obs_gamma * phi * np.exp(-self.obs_beta * abs(phi))
+            	if np.linalg.norm(o - x) > np.linalg.norm(g - x):
+            	    dphi = 0
+ 
+            	p += dphi
         return p
 
 
-    # Generate a trajectory
+    # Geeerate a trajectory
     def generate(self, w, x0, g, time, s, psv, obstacles = []):
 
         # Initialize variables
@@ -129,7 +138,7 @@ class DynamicMovementPrimitive:
             f_rep[i] = p_sum/p_div*sigma[i]
 
             if self.obs:
-                p = self.avoid_obstacles(x[i], dx[i], g, obstacles)
+                p = self.avoid_obstacles(x[i-1], dx[i-1], g, obstacles)
 
         
             # Calculate the new trajectory

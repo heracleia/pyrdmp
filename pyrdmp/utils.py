@@ -91,3 +91,47 @@ def trajectory(alpha, t):
 
     return tj
 
+
+# Rotation matrix 4x4
+def rotate(t, p = np):
+    Rz = np.array([[ p.cos(t[0]),-p.sin(t[0]),           0, 0],
+                   [ p.sin(t[0]), p.cos(t[0]),           0, 0],
+                   [           0,           0,           1, 0],
+                   [           0,           0,           0, 1]])
+    Ry = np.array([[ p.cos(t[1]),           0, p.sin(t[1]), 0],
+                   [           0,           1,           0, 0],
+                   [-p.sin(t[1]),           0, p.cos(t[1]), 0],
+                   [           0,           0,           0, 1]])
+    Rx = np.array([[           1,           0,           0, 0],
+                   [           0, p.cos(t[2]),-p.sin(t[2]), 0],
+                   [           0, p.sin(t[2]), p.cos(t[2]), 0],
+                   [           0,           0,           0, 1]])
+    return Rz.dot(Ry).dot(Rx)
+
+
+# Adapted from: http://enesbot.me/tutorial-forward-kinematics-part-ii.html
+def draw_frame(ax, cart):
+    """Draws a coordinate reference frame from a 4x4 matrix.
+    Adds an extra thick line along the Z axis and around the
+    origin to simulate the joint in a robot segment"""
+
+    R = rotate(cart[3:])[0:3,0:3] # rotation matrix
+    T = cart[:3]   # extract traslation matrix
+    p1 = np.matrix([[0.1],[0],[0]]) # get the 3 other points of the frame
+    p2 = np.matrix([[0],[0.1],[0]])
+    p3 = np.matrix([[0],[0],[0.1]])
+    p1 = R*p1   # Rotate the points
+    p2 = R*p2
+    p3 = R*p3
+    x = T.item(0)   # Get the origin's position of the frame
+    y = T.item(1)
+    z = T.item(2)
+    #draw the line from the origin to each of the points
+    ax.plot([x,x+p1[0]],[y,y+p1[1]],[z,z+p1[2]], color='red')
+    ax.plot([x,x+p2[0]],[y,y+p2[1]],[z,z+p2[2]], color='green')
+    ax.plot([x,x+p3[0]],[y,y+p3[1]],[z,z+p3[2]], color='blue')
+    l = 0.02 # extra line for origin
+    ax.plot([x-p3.item(0)*l,x+p3.item(0)*l],
+            [y-p3.item(1)*l,y+p3.item(1)*l],
+            [z-p3.item(2)*l,z+p3.item(2)*l],
+            linewidth=2, color = "k") 

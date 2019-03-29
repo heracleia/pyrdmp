@@ -2,7 +2,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import cm, rc
 from mpl_toolkits.mplot3d import Axes3D
-
+from pyrdmp.utils import rotate, draw_frame
+import numpy as np
 
 rc('text', usetex=True)
 FONTSIZE=16
@@ -90,11 +91,16 @@ def expected_return(gain, title='Expected Return per Episode', directory='', sav
     return figure
 
 
-def cartesian_history(cartesian, title='Cartesian History', directory='', save=True):
+def cartesian_history(cartesian, scalars, title='Cartesian History', directory='', save=True):
     figure = plt.figure()
     ax = figure.add_subplot(111, projection='3d')
-    for cart in cartesian:
-        ax.scatter(cart[:,0], cart[:,1], cart[:,2], 'b')
+
+    for i, cart in enumerate(cartesian):
+        ax.scatter(cart[:,0], cart[:,1], cart[:,2], 'b', s=scalars[i])
+        for j, c in enumerate(cart):
+            if j % 100 == 0:
+                draw_frame(ax, c)
+
     ax.text2D(0.05, 0.95, title, transform=ax.transAxes)
     ax.set_xlabel('X axis')
     ax.set_ylabel('Y axis')
