@@ -26,3 +26,19 @@ A description of the available commands can be found with: `python ex_dmp_adapta
 
 Tested on Ubuntu 16.04, 14.04, and 12.04
 
+## Citing
+
+```
+@misc{Theofanidis2019,
+  author = {Theofanidis, Michail and Cloud, Joe and Brady, James},
+  title = {pyrdmp: python library for dynamic movement primitives with reinforcement learning},
+  year = {2019},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/heracleia/pyrdmp}},
+  commit = {cfaeae5d0634e98433c1121ed2f69ca69483e0b1}
+}
+
+
+```
+
